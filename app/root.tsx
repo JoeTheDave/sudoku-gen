@@ -6,6 +6,8 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react';
+import { ClientOnly } from 'remix-utils';
+import Layout from '~/components/Layout';
 import stylesUrl from './styles/tailwind.css';
 
 import type { LinksFunction } from '@remix-run/server-runtime';
@@ -37,10 +39,13 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <div className="text-center font-logo text-5xl text-gray-500 mt-10">
-          Sudoku
-        </div>
-        <Outlet />
+        <ClientOnly>
+          {() => (
+            <Layout>
+              <Outlet />
+            </Layout>
+          )}
+        </ClientOnly>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
