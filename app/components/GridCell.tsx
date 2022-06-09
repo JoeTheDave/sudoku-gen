@@ -13,16 +13,19 @@ const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
   return (
     <div
       key={`cell-${cellData.id}`}
-      className="border box-border"
+      className="border box-border flex justify-center items-center font-pencil text-gray-500 text-shadow"
       data-id={cellData.id}
       style={{
         width: cellSize,
         height: cellSize,
-        backgroundColor: cellData.active ? 'red' : 'white',
+        fontSize: cellSize - 10,
+        backgroundColor: cellData.active
+          ? 'rgba(200, 230, 250, 0.25)'
+          : 'white',
       }}
       onClick={clickHandler}
     >
-      {cellData.id}
+      {cellData.number}
     </div>
   );
 };

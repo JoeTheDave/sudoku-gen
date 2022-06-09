@@ -145,3 +145,38 @@ describe('When SudokuData.moveActiveCellWest is called', () => {
     expect(data.activeCell?.id).toBe(39);
   });
 });
+
+describe('When SudokuData.setActiveCellNumber is called', () => {
+  it('should set the active cell to have the number passed in.', () => {
+    const data = new SudokuData();
+    data.setActiveCell(40);
+    data.setActiveCellNumber(5);
+    expect(data.grid[40].number).toBe(5);
+  });
+  it('should set the active cell to null if null is passed in.', () => {
+    const data = new SudokuData();
+    data.setActiveCell(40);
+    data.setActiveCellNumber(5);
+    expect(data.grid[40].number).toBe(5);
+    data.setActiveCellNumber(null);
+    expect(data.grid[40].number).toBeNull();
+  });
+  it('should throw an error if passed an invalid number.', () => {
+    const data = new SudokuData();
+    data.setActiveCell(40);
+    expect(() => data.setActiveCellNumber(10)).toThrowError(
+      '10 is an invalid number assignment.',
+    );
+    expect(() => data.setActiveCellNumber(0)).toThrowError(
+      '0 is an invalid number assignment.',
+    );
+  });
+  it('should set userDefined field to true if value passed is not null or back to false if null is passed.', () => {
+    const data = new SudokuData();
+    data.setActiveCell(40);
+    data.setActiveCellNumber(5);
+    expect(data.activeCell?.userDefined).toBe(true);
+    data.setActiveCellNumber(null);
+    expect(data.activeCell?.userDefined).toBe(false);
+  });
+});

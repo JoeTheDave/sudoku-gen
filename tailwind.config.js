@@ -4,6 +4,8 @@ module.exports = {
     extend: {
       fontFamily: {
         logo: ['"Permanent Marker"', 'cursive'],
+        pencil: ['"Shadows Into Light"', 'cursive'],
+        roboto: ['"Roboto"', 'sans-serif'],
       },
     },
   },

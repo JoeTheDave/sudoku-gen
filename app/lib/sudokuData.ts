@@ -7,6 +7,8 @@ export class Cell {
   south: Cell;
   west: Cell;
   active: boolean;
+  number: number | null;
+  userDefined: boolean;
 
   constructor(id: number) {
     this.id = id;
@@ -15,6 +17,8 @@ export class Cell {
     this.south = null as unknown as Cell;
     this.west = null as unknown as Cell;
     this.active = false;
+    this.number = null;
+    this.userDefined = false;
   }
 }
 
@@ -78,6 +82,16 @@ export class SudokuData {
   moveActiveCellWest = () => {
     if (this.activeCell) {
       this.setActiveCell(this.activeCell.west);
+    }
+  };
+
+  setActiveCellNumber = (number: number | null) => {
+    if (number !== null && (number < 1 || number > 9)) {
+      throw new Error(`${number} is an invalid number assignment.`);
+    }
+    if (this.activeCell) {
+      this.activeCell.number = number;
+      this.activeCell.userDefined = number === null ? false : true;
     }
   };
 }
