@@ -468,6 +468,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   --tw-backdrop-sepia:  ;
 }
 
+.relative {
+  position: relative;
+}
+
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
 .mt-10 {
   margin-top: 2.5rem;
 }
@@ -484,6 +492,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   display: grid;
 }
 
+.w-80 {
+  width: 20rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .flex-wrap {
   flex-wrap: wrap;
 }
@@ -496,6 +512,10 @@ Ensure the default browser behavior of the `hidden` attribute.
   justify-content: center;
 }
 
+.justify-between {
+  justify-content: space-between;
+}
+
 .border {
   border-width: 1px;
 }
@@ -504,16 +524,12 @@ Ensure the default browser behavior of the `hidden` attribute.
   text-align: center;
 }
 
-.font-pencil {
-  font-family: "Shadows Into Light", cursive;
+.font-acme {
+  font-family: "Acme", sans-serif;
 }
 
 .font-logo {
   font-family: "Permanent Marker", cursive;
-}
-
-.font-acme {
-  font-family: "Acme", sans-serif;
 }
 
 .text-5xl {
@@ -526,9 +542,23 @@ Ensure the default browser behavior of the `hidden` attribute.
   line-height: 2rem;
 }
 
+.font-bold {
+  font-weight: 700;
+}
+
 .text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity));
+}
+
+.text-gray-700 {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity));
+}
+
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .filter {
@@ -536,5 +566,33 @@ Ensure the default browser behavior of the `hidden` attribute.
 }
 
 .text-shadow {
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0px 2px rgba(0, 0, 0, 1), 0 0px 1px rgba(0, 0, 0, 1);
+}
+
+.hover-zone {
+  width: 12rem;
+  height: 12rem;
+  border-radius: 50%;
+  position: absolute;
+  top: -10.5rem;
+  left: -8rem;
+  transition: 0.5s;
+  background-color: rgba(50, 50, 50, 0.1);
+  overflow: hidden;
+}
+
+.hover-zone:hover {
+  padding-top: 140px;
+  padding-left: 140px;
+  padding-right: 20px;
+  width: 30rem;
+  height: 17rem;
+  border-radius: 5px;
+  background-color: rgba(50, 50, 50, 0.2);
+  border: solid 1px black;
+}
+
+.hover\:text-green-300:hover {
+  --tw-text-opacity: 1;
+  color: rgb(134 239 172 / var(--tw-text-opacity));
 }

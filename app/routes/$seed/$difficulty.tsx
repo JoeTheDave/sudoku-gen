@@ -1,4 +1,6 @@
 import { useLoaderData } from '@remix-run/react';
+import { useEffect } from 'react';
+import { useNavigate } from '@remix-run/react';
 import { SudokuData } from '~/lib/sudokuData';
 import SudokuGrid from '~/components/SudokuGrid';
 
@@ -19,6 +21,17 @@ type LoaderData = {
 
 export default function DifficultyRoute() {
   const { params } = useLoaderData<LoaderData>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (
+      !['gentle', 'easy', 'medium', 'hard', 'extreme'].includes(
+        params.difficulty.toLowerCase(),
+      )
+    ) {
+      navigate('/');
+    }
+  }, [params.difficulty]);
 
   const sudokuData = new SudokuData();
 
