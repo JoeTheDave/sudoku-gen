@@ -207,3 +207,15 @@ describe('When SudokuData.setActiveCellNumber is called', () => {
     expect(data.activeCell?.userDefined).toBe(false);
   });
 });
+
+describe("If a grid cell has the same number as one of it's associated cells", () => {
+  it('should be marked as being in conflict', () => {
+    const data = new SudokuData();
+    data.grid[40].number = 5;
+    data.grid[41].number = 5;
+    data.grid[0].number = 5;
+    expect(data.grid[40].isInConflict()).toBe(true);
+    expect(data.grid[41].isInConflict()).toBe(true);
+    expect(data.grid[0].isInConflict()).toBe(false);
+  });
+});

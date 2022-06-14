@@ -31,6 +31,11 @@ export class Cell {
 
   isActiveCellAssociation = () =>
     this.allAssociations.filter((cell) => cell.active).length === 1;
+
+  isInConflict = () =>
+    !!this.allAssociations.filter(
+      (cell) => cell.number !== null && cell.number === this.number,
+    ).length;
 }
 
 export class SudokuData {

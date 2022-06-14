@@ -1,4 +1,5 @@
 import React from 'react';
+import cx from 'classnames';
 
 import type { FC } from 'react';
 import type { Cell } from '~/lib/sudokuData';
@@ -13,7 +14,14 @@ const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
   return (
     <div
       key={`cell-${cellData.id}`}
-      className="border box-border flex justify-center items-center font-acme text-gray-500"
+      className={cx(
+        'border box-border flex justify-center items-center font-acme ',
+        {
+          'text-gray-500': !cellData.isInConflict() && !cellData.userDefined,
+          'text-red-500': cellData.isInConflict(),
+          'text-blue-500': !cellData.isInConflict() && cellData.userDefined,
+        },
+      )}
       data-id={cellData.id}
       style={{
         width: cellSize,
