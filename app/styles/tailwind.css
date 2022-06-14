@@ -551,16 +551,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 
-.text-gray-700 {
-  --tw-text-opacity: 1;
-  color: rgb(55 65 81 / var(--tw-text-opacity));
-}
-
-.text-white {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
-}
-
 .text-red-500 {
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity));
@@ -569,6 +559,16 @@ Ensure the default browser behavior of the `hidden` attribute.
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity));
+}
+
+.text-gray-700 {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity));
+}
+
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .filter {
@@ -600,6 +600,19 @@ Ensure the default browser behavior of the `hidden` attribute.
   border-radius: 5px;
   background-color: rgba(50, 50, 50, 0.2);
   border: solid 1px black;
+}
+
+.settings-icon {
+  position: relative;
+  left: 128px;
+  top: -6px;
+  opacity: 0.25;
+  width: 40px;
+  transition: 0.5s;
+}
+
+.hover-zone:hover .settings-icon {
+  opacity: 0;
 }
 
 .hover\:text-green-300:hover {

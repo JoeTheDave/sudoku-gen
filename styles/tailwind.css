@@ -37,4 +37,15 @@
     background-color: rgba(50, 50, 50, 0.2);
     border: solid 1px black;
   }
+  .settings-icon {
+    position: relative;
+    left: 128px;
+    top: -6px;
+    opacity: 0.25;
+    width: 40px;
+    transition: 0.5s;
+  }
+  .hover-zone:hover .settings-icon {
+    opacity: 0;
+  }
 }
