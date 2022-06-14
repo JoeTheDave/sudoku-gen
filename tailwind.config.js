@@ -6,6 +6,7 @@ module.exports = {
         logo: ['"Permanent Marker"', 'cursive'],
         pencil: ['"Shadows Into Light"', 'cursive'],
         roboto: ['"Roboto"', 'sans-serif'],
+        acme: ['"Acme"', 'sans-serif'],
       },
     },
   },

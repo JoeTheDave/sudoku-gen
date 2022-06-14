@@ -5,7 +5,11 @@
 @layer utilities {
   .pencil-line-1 {
     background-color: red;
-    /* ... */
+    /*
+    https://codemyui.com/tag/hand-drawn/
+    https://codepen.io/tmrDevelops/pen/NPXodB
+    https://codepen.io/AlexOverbeck/pen/axGQyv?editors=1100
+    */
   }
 
   .text-shadow {

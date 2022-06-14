@@ -30,6 +30,33 @@ describe('When SudokuData is instantiated', () => {
     expect(data.grid[72].south.id).toBe(0);
     expect(data.grid[79].south.id).toBe(7);
   });
+  it('Should have cells with appropriate row associations.', () => {
+    expect(data.grid[40].rowAssociations.length).toBe(8);
+    [36, 37, 38, 39, 41, 42, 43, 44].forEach((id) =>
+      expect(data.grid[40].rowAssociations.includes(data.grid[id])).toBe(true),
+    );
+  });
+  it('Should have cells with appropriate col associations.', () => {
+    expect(data.grid[0].colAssociations.length).toBe(8);
+    [4, 13, 22, 31, 49, 58, 67, 76].forEach((id) =>
+      expect(data.grid[40].colAssociations.includes(data.grid[id])).toBe(true),
+    );
+  });
+  it('Should have cells with appropriate grid associations.', () => {
+    expect(data.grid[0].gridAssociations.length).toBe(8);
+    [30, 31, 32, 39, 41, 48, 49, 50].forEach((id) =>
+      expect(data.grid[40].gridAssociations.includes(data.grid[id])).toBe(true),
+    );
+  });
+  it('Should have cells with appropriate lists of all associations.', () => {
+    expect(data.grid[0].allAssociations.length).toBe(20);
+    [
+      36, 37, 38, 39, 41, 42, 43, 44, 4, 13, 22, 31, 49, 58, 67, 76, 30, 32, 48,
+      50,
+    ].forEach((id) =>
+      expect(data.grid[40].allAssociations.includes(data.grid[id])).toBe(true),
+    );
+  });
 });
 
 describe('When SudokuData is instantiated with existing data', () => {

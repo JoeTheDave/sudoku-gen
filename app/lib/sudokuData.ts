@@ -1,4 +1,4 @@
-import { range } from 'lodash';
+import { compact, range, uniq } from 'lodash';
 
 export class Cell {
   id: number;
@@ -9,6 +9,10 @@ export class Cell {
   active: boolean;
   number: number | null;
   userDefined: boolean;
+  rowAssociations: Cell[];
+  colAssociations: Cell[];
+  gridAssociations: Cell[];
+  allAssociations: Cell[];
 
   constructor(id: number) {
     this.id = id;
@@ -19,7 +23,14 @@ export class Cell {
     this.active = false;
     this.number = null;
     this.userDefined = false;
+    this.rowAssociations = [];
+    this.colAssociations = [];
+    this.gridAssociations = [];
+    this.allAssociations = [];
   }
+
+  isActiveCellAssociation = () =>
+    this.allAssociations.filter((cell) => cell.active).length === 1;
 }
 
 export class SudokuData {
@@ -38,6 +49,34 @@ export class SudokuData {
         cell.west = this.grid[cell.id % 9 === 0 ? cell.id + 8 : cell.id - 1];
         cell.north = this.grid[cell.id < 9 ? cell.id + 72 : cell.id - 9];
         cell.south = this.grid[cell.id > 71 ? cell.id - 72 : cell.id + 9];
+        const rowStartId = cell.id - (cell.id % 9);
+        const colStartId = cell.id % 9;
+        const gridStartId =
+          cell.id - (cell.id % 27) + (cell.id % 9) - (cell.id % 3);
+        cell.rowAssociations = compact(
+          range(9).map((i) => {
+            const associatedCell = this.grid[rowStartId + i];
+            return associatedCell.id === cell.id ? null : associatedCell;
+          }),
+        );
+        cell.colAssociations = compact(
+          range(9).map((i) => {
+            const associatedCell = this.grid[colStartId + i * 9];
+            return associatedCell.id === cell.id ? null : associatedCell;
+          }),
+        );
+        cell.gridAssociations = compact(
+          range(9).map((i) => {
+            const associatedCell =
+              this.grid[gridStartId + (i % 3) + Math.floor(i / 3) * 9];
+            return associatedCell.id === cell.id ? null : associatedCell;
+          }),
+        );
+        cell.allAssociations = uniq([
+          ...cell.rowAssociations,
+          ...cell.colAssociations,
+          ...cell.gridAssociations,
+        ]);
       });
       this.activeCell = null;
     }

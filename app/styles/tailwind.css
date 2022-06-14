@@ -504,12 +504,16 @@ Ensure the default browser behavior of the `hidden` attribute.
   text-align: center;
 }
 
+.font-pencil {
+  font-family: "Shadows Into Light", cursive;
+}
+
 .font-logo {
   font-family: "Permanent Marker", cursive;
 }
 
-.font-pencil {
-  font-family: "Shadows Into Light", cursive;
+.font-acme {
+  font-family: "Acme", sans-serif;
 }
 
 .text-5xl {
@@ -525,6 +529,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 .text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity));
+}
+
+.filter {
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
 .text-shadow {
