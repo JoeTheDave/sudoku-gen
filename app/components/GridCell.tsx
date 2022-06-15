@@ -11,22 +11,17 @@ interface GridCellProps {
 }
 
 const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
+  if (cellData.possibilities.length) {
+    console.log(cellData.id, cellData.possibilities);
+  }
   return (
     <div
       key={`cell-${cellData.id}`}
-      className={cx(
-        'border box-border flex justify-center items-center font-acme ',
-        {
-          'text-gray-500': !cellData.isInConflict() && !cellData.userDefined,
-          'text-red-500': cellData.isInConflict(),
-          'text-blue-500': !cellData.isInConflict() && cellData.userDefined,
-        },
-      )}
+      className={'border box-border'}
       data-id={cellData.id}
       style={{
         width: cellSize,
         height: cellSize,
-        fontSize: cellSize - 10,
         backgroundColor: cellData.active
           ? 'rgba(200, 230, 250, 0.25)'
           : cellData.isActiveCellAssociation()
@@ -35,7 +30,52 @@ const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
       }}
       onClick={clickHandler}
     >
-      {cellData.number}
+      {cellData.number && (
+        <div
+          className={cx(
+            'flex justify-center items-center font-acme w-full h-full pointer-events-none',
+            {
+              'text-gray-500':
+                !cellData.isInConflict() && !cellData.userDefined,
+              'text-red-500': cellData.isInConflict(),
+              'text-blue-500': !cellData.isInConflict() && cellData.userDefined,
+            },
+          )}
+          style={{
+            fontSize: cellSize - 10,
+          }}
+        >
+          {cellData.number}
+        </div>
+      )}
+      {!cellData.number && (
+        <div className="flex h-full flex-col justify-between font-acme text-gray-300 pointer-events-none">
+          {[1, 2, 3].map((r) => (
+            <div
+              key={`${cellData.id}-note-row-${r}`}
+              className="flex justify-between"
+              style={{
+                height: Math.floor(cellSize / 3),
+              }}
+            >
+              {[1, 2, 3].map((c) => (
+                <div
+                  key={`${cellData.id}-note-col-${c}`}
+                  className="flex items-center justify-center"
+                  style={{
+                    width: Math.floor(cellSize / 3),
+                    fontSize: Math.floor((cellSize / 3) * 0.75),
+                  }}
+                >
+                  {cellData.possibilities.includes((r - 1) * 3 + c)
+                    ? (r - 1) * 3 + c
+                    : ''}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

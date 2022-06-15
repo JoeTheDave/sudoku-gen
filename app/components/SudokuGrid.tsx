@@ -12,6 +12,7 @@ interface SudokuGridProps {
 
 type Action =
   | { type: 'SetActive'; cell: number }
+  | { type: 'SetNotation'; num: number }
   | { type: 'SetNumber'; num: number }
   | { type: 'ArrowUp' | 'ArrowRight' | 'ArrowDown' | 'ArrowLeft' | 'Space' };
 
@@ -19,6 +20,9 @@ function reducer(state: SudokuData, action: Action) {
   switch (action.type) {
     case 'SetActive':
       state.setActiveCell(action.cell);
+      return new SudokuData(state);
+    case 'SetNotation':
+      state.toggleActiveCellPossibility(action.num);
       return new SudokuData(state);
     case 'SetNumber':
       state.setActiveCellNumber(action.num);
@@ -50,8 +54,9 @@ const SudokuGrid: FC<SudokuGridProps> = ({ data }) => {
 
   const keyPressHandler = useCallback((e: KeyboardEvent) => {
     const num = parseInt(e.key);
+    const shifted = e.shiftKey;
     if (num) {
-      dispatch({ type: 'SetNumber', num });
+      dispatch({ type: shifted ? 'SetNotation' : 'SetNumber', num });
     }
     if (e.key === 'ArrowUp') {
       dispatch({ type: e.key });

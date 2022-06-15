@@ -63,7 +63,7 @@ describe('When SudokuData is instantiated with existing data', () => {
   const data = new SudokuData();
   data.setActiveCell(40);
   const newData = new SudokuData(data);
-  it('should have same values as existing data', () => {
+  it('should have same values as existing data.', () => {
     expect(newData.activeCell?.id).toBe(40);
     expect(newData.getCellById(40).active).toBe(true);
   });
@@ -71,12 +71,12 @@ describe('When SudokuData is instantiated with existing data', () => {
 
 describe('When SudokuData.getCellById is called', () => {
   const data = new SudokuData();
-  it('should return the cell with id that was passed in', () => {
+  it('should return the cell with id that was passed in.', () => {
     const cell = data.getCellById(40);
     expect(cell).not.toBeNull();
     expect(cell?.id).toBe(40);
   });
-  it('should throw an error if called with an invalid id', () => {
+  it('should throw an error if called with an invalid id.', () => {
     expect(() => data.getCellById(81)).toThrowError(
       '81 is not a valid cell id.',
     );
@@ -127,7 +127,7 @@ describe('When SudokuData.moveActiveCellNorth is called', () => {
     data.moveActiveCellNorth();
     expect(data.activeCell).toBeNull();
   });
-  it('should set the new active cell appropriately', () => {
+  it('should set the new active cell appropriately.', () => {
     data.setActiveCell(data.getCellById(40));
     data.moveActiveCellNorth();
     expect(data.activeCell?.id).toBe(31);
@@ -140,7 +140,7 @@ describe('When SudokuData.moveActiveCellEast is called', () => {
     data.moveActiveCellEast();
     expect(data.activeCell).toBeNull();
   });
-  it('should set the new active cell appropriately', () => {
+  it('should set the new active cell appropriately.', () => {
     data.setActiveCell(data.getCellById(40));
     data.moveActiveCellEast();
     expect(data.activeCell?.id).toBe(41);
@@ -153,7 +153,7 @@ describe('When SudokuData.moveActiveCellSouth is called', () => {
     data.moveActiveCellSouth();
     expect(data.activeCell).toBeNull();
   });
-  it('should set the new active cell appropriately', () => {
+  it('should set the new active cell appropriately.', () => {
     data.setActiveCell(data.getCellById(40));
     data.moveActiveCellSouth();
     expect(data.activeCell?.id).toBe(49);
@@ -166,7 +166,7 @@ describe('When SudokuData.moveActiveCellWest is called', () => {
     data.moveActiveCellWest();
     expect(data.activeCell).toBeNull();
   });
-  it('should set the new active cell appropriately', () => {
+  it('should set the new active cell appropriately.', () => {
     data.setActiveCell(data.getCellById(40));
     data.moveActiveCellWest();
     expect(data.activeCell?.id).toBe(39);
@@ -206,10 +206,26 @@ describe('When SudokuData.setActiveCellNumber is called', () => {
     data.setActiveCellNumber(null);
     expect(data.activeCell?.userDefined).toBe(false);
   });
+
+  it('should clear the list of cell possibilities', () => {
+    const data = new SudokuData();
+    data.setActiveCell(0);
+    data.toggleActiveCellPossibility(4);
+    data.toggleActiveCellPossibility(8);
+    data.toggleActiveCellPossibility(6);
+    data.toggleActiveCellPossibility(5);
+    data.setActiveCellNumber(5);
+    expect(data.activeCell?.possibilities.length).toBe(0);
+    data.toggleActiveCellPossibility(2);
+    data.toggleActiveCellPossibility(9);
+    data.toggleActiveCellPossibility(3);
+    data.setActiveCellNumber(null);
+    expect(data.activeCell?.possibilities.length).toBe(0);
+  });
 });
 
 describe("If a grid cell has the same number as one of it's associated cells", () => {
-  it('should be marked as being in conflict', () => {
+  it('should be marked as being in conflict.', () => {
     const data = new SudokuData();
     data.grid[40].number = 5;
     data.grid[41].number = 5;
@@ -217,5 +233,29 @@ describe("If a grid cell has the same number as one of it's associated cells", (
     expect(data.grid[40].isInConflict()).toBe(true);
     expect(data.grid[41].isInConflict()).toBe(true);
     expect(data.grid[0].isInConflict()).toBe(false);
+  });
+});
+
+describe('If SudokuData.toggleActiveCellPossibility is called', () => {
+  it('should add the numbers to the possibilities array in order.', () => {
+    const data = new SudokuData();
+    data.setActiveCell(0);
+    data.toggleActiveCellPossibility(4);
+    data.toggleActiveCellPossibility(8);
+    data.toggleActiveCellPossibility(6);
+    data.toggleActiveCellPossibility(5);
+    expect(data.grid[0].possibilities[0]).toBe(4);
+    expect(data.grid[0].possibilities[1]).toBe(5);
+    expect(data.grid[0].possibilities[2]).toBe(6);
+    expect(data.grid[0].possibilities[3]).toBe(8);
+  });
+  it('should remove a number that already exists.', () => {
+    const data = new SudokuData();
+    data.setActiveCell(0);
+    data.toggleActiveCellPossibility(4);
+    data.toggleActiveCellPossibility(5);
+    data.toggleActiveCellPossibility(4);
+    expect(data.grid[0].possibilities.includes(5)).toBe(true);
+    expect(data.grid[0].possibilities.includes(4)).toBe(false);
   });
 });

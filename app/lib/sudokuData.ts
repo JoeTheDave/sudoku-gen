@@ -1,4 +1,4 @@
-import { compact, range, uniq } from 'lodash';
+import { compact, range, uniq, sortBy } from 'lodash';
 
 export class Cell {
   id: number;
@@ -8,6 +8,7 @@ export class Cell {
   west: Cell;
   active: boolean;
   number: number | null;
+  possibilities: number[];
   userDefined: boolean;
   rowAssociations: Cell[];
   colAssociations: Cell[];
@@ -22,6 +23,7 @@ export class Cell {
     this.west = null as unknown as Cell;
     this.active = false;
     this.number = null;
+    this.possibilities = [];
     this.userDefined = false;
     this.rowAssociations = [];
     this.colAssociations = [];
@@ -95,9 +97,11 @@ export class SudokuData {
     return targetCell;
   };
 
+  getCell = (ref: Cell | number) =>
+    typeof ref === 'number' ? this.getCellById(ref) : ref;
+
   setActiveCell = (cell: Cell | number) => {
-    const newActiveCell =
-      typeof cell === 'number' ? this.getCellById(cell) : cell;
+    const newActiveCell = this.getCell(cell);
     if (this.activeCell) {
       this.activeCell.active = false;
     }
@@ -136,6 +140,22 @@ export class SudokuData {
     if (this.activeCell) {
       this.activeCell.number = number;
       this.activeCell.userDefined = number === null ? false : true;
+      this.activeCell.possibilities = [];
+    }
+  };
+
+  toggleActiveCellPossibility = (number: number) => {
+    if (this.activeCell) {
+      if (this.activeCell.possibilities.includes(number)) {
+        this.activeCell.possibilities = this.activeCell.possibilities.filter(
+          (n) => n !== number,
+        );
+      } else {
+        this.activeCell.possibilities = sortBy([
+          ...this.activeCell.possibilities,
+          number,
+        ]);
+      }
     }
   };
 }
