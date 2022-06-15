@@ -1,4 +1,4 @@
-import { compact, range, uniq, sortBy } from 'lodash';
+import { compact, range, uniq, sortBy, flatten } from 'lodash';
 
 export class Cell {
   id: number;
@@ -195,6 +195,40 @@ export class SudokuData {
   getEmptyCellCount = () => this.grid.filter((c) => !c.number).length;
 
   // Untested
+  getRowListBySeed = (seed: number) =>
+    range(seed * 9, seed * 9 + 9).map((cellId) => this.grid[cellId]);
+
+  // Untested
+  getColListBySeed = (seed: number) =>
+    range(seed, 81, 9).map((cellId) => this.grid[cellId]);
+
+  // Untested
+  getGridListBSeed = (seed: number) => {
+    const gridRoot = (seed % 3) * 3 + Math.floor(seed / 3) * 27;
+    return flatten(
+      range(gridRoot, gridRoot + 27, 9).map((gridRowRoot) =>
+        range(gridRowRoot, gridRowRoot + 3),
+      ),
+    ).map((cellId) => this.grid[cellId]);
+  };
+
+  // Untested
+  determineSingleOptionInListForNumber = (
+    listGenerator: (seed: number) => Cell[],
+  ) =>
+    range(0, 9).forEach((rowSeed) => {
+      range(1, 10).forEach((num) => {
+        const options: Cell[] = listGenerator(rowSeed).filter((cell) =>
+          cell.possibilities.includes(num),
+        );
+        if (options.length === 1) {
+          options[0].number = num;
+        }
+      });
+    });
+
+  // Untested
+  // Solves Easy but not Medium
   executeAlphaSolution = () => {
     let exitCondition = false;
     do {
@@ -209,7 +243,27 @@ export class SudokuData {
   };
 
   // Untested
+  // Solves Medium but not Hard
+  executeBetaSolution = () => {
+    let exitCondition = false;
+    do {
+      let preliminaryEmptyCount = this.getEmptyCellCount();
+      this.calculateCellPossibilities();
+      this.determineSingleOptionInListForNumber(this.getRowListBySeed);
+      this.calculateCellPossibilities();
+      this.determineSingleOptionInListForNumber(this.getColListBySeed);
+      this.calculateCellPossibilities();
+      this.determineSingleOptionInListForNumber(this.getGridListBSeed);
+      this.executeAlphaSolution();
+      let emptyCount = this.getEmptyCellCount();
+      if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
+        exitCondition = true;
+      }
+    } while (!exitCondition);
+  };
+
+  // Untested
   solve = () => {
-    this.executeAlphaSolution();
+    this.executeBetaSolution();
   };
 }
