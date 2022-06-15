@@ -183,7 +183,33 @@ export class SudokuData {
     });
 
   // Untested
+  populateCellsWithSinglePossibility = () => {
+    this.grid.forEach((cell) => {
+      if (!cell.number && cell.possibilities.length === 1) {
+        cell.number = cell.possibilities[0];
+      }
+    });
+  };
+
+  // Untested
+  getEmptyCellCount = () => this.grid.filter((c) => !c.number).length;
+
+  // Untested
+  executeAlphaSolution = () => {
+    let exitCondition = false;
+    do {
+      let preliminaryEmptyCount = this.getEmptyCellCount();
+      this.calculateCellPossibilities();
+      this.populateCellsWithSinglePossibility();
+      let emptyCount = this.getEmptyCellCount();
+      if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
+        exitCondition = true;
+      }
+    } while (!exitCondition);
+  };
+
+  // Untested
   solve = () => {
-    this.calculateCellPossibilities();
+    this.executeAlphaSolution();
   };
 }

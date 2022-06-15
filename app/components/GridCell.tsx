@@ -11,9 +11,6 @@ interface GridCellProps {
 }
 
 const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
-  if (cellData.possibilities.length) {
-    console.log(cellData.id, cellData.possibilities);
-  }
   return (
     <div
       key={`cell-${cellData.id}`}
