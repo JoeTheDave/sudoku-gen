@@ -25,7 +25,7 @@ export default function DifficultyRoute() {
 
   useEffect(() => {
     if (
-      !['gentle', 'easy', 'medium', 'hard', 'extreme'].includes(
+      !['easy', 'medium', 'hard', 'extreme', 'evil'].includes(
         params.difficulty.toLowerCase(),
       )
     ) {

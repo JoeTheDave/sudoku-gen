@@ -13,9 +13,6 @@ const Layout: FC = ({ children }) => {
       <div className="hover-zone">
         <div className="font-bold text-gray-700">New Puzzle</div>
         <div className="flex justify-between w-80 mb-5">
-          <MenuLink clickHandler={() => navigate(`/${seed}/gentle`)}>
-            Gentle
-          </MenuLink>
           <MenuLink clickHandler={() => navigate(`/${seed}/easy`)}>
             Easy
           </MenuLink>
@@ -27,6 +24,9 @@ const Layout: FC = ({ children }) => {
           </MenuLink>
           <MenuLink clickHandler={() => navigate(`/${seed}/extreme`)}>
             Extreme
+          </MenuLink>
+          <MenuLink clickHandler={() => navigate(`/${seed}/evil`)}>
+            Evil
           </MenuLink>
         </div>
         <div className="font-bold text-gray-700">Tools</div>

@@ -158,4 +158,32 @@ export class SudokuData {
       }
     }
   };
+
+  clearActiveCell = () => {
+    if (this.activeCell) {
+      this.activeCell.active = false;
+      this.activeCell = null;
+    }
+  };
+
+  // Untested
+  calculateCellPossibilities = () =>
+    this.grid.forEach((cell) => {
+      if (!cell.number) {
+        cell.possibilities = cell.allAssociations.reduce(
+          (possibilities, associatedCell) => {
+            return associatedCell.number &&
+              possibilities.includes(associatedCell.number)
+              ? possibilities.filter((num) => num !== associatedCell.number)
+              : possibilities;
+          },
+          range(1, 10),
+        );
+      }
+    });
+
+  // Untested
+  solve = () => {
+    this.calculateCellPossibilities();
+  };
 }

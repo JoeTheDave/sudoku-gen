@@ -259,3 +259,13 @@ describe('If SudokuData.toggleActiveCellPossibility is called', () => {
     expect(data.grid[0].possibilities.includes(4)).toBe(false);
   });
 });
+
+describe('If SudokuData.clearActiveCell is called', () => {
+  it('should clear any existing active cell.', () => {
+    const data = new SudokuData();
+    data.setActiveCell(40);
+    data.clearActiveCell();
+    expect(data.grid[40].active).toBe(false);
+    expect(data.activeCell).toBe(null);
+  });
+});

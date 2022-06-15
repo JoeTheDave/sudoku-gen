@@ -8,13 +8,22 @@ import type { FC } from 'react';
 
 interface SudokuGridProps {
   data: SudokuData;
+  showSolver?: boolean;
 }
 
 type Action =
   | { type: 'SetActive'; cell: number }
   | { type: 'SetNotation'; num: number }
   | { type: 'SetNumber'; num: number }
-  | { type: 'ArrowUp' | 'ArrowRight' | 'ArrowDown' | 'ArrowLeft' | 'Space' };
+  | {
+      type:
+        | 'ArrowUp'
+        | 'ArrowRight'
+        | 'ArrowDown'
+        | 'ArrowLeft'
+        | 'Space'
+        | 'Solve';
+    };
 
 function reducer(state: SudokuData, action: Action) {
   switch (action.type) {
@@ -42,12 +51,15 @@ function reducer(state: SudokuData, action: Action) {
     case 'Space':
       state.setActiveCellNumber(null);
       return new SudokuData(state);
+    case 'Solve':
+      state.solve();
+      return new SudokuData(state);
     default:
       throw new Error();
   }
 }
 
-const SudokuGrid: FC<SudokuGridProps> = ({ data }) => {
+const SudokuGrid: FC<SudokuGridProps> = ({ data, showSolver }) => {
   const [width, height] = useWindowSize();
 
   const [sudokuData, dispatch] = useReducer(reducer, data);
@@ -95,22 +107,37 @@ const SudokuGrid: FC<SudokuGridProps> = ({ data }) => {
   const gridSize: number = cellSize * 9 + 2;
 
   return (
-    <div className="flex justify-center mt-10">
-      <div
-        className="flex flex-wrap border box-border"
-        style={{ width: gridSize }}
-      >
-        {sudokuData &&
-          sudokuData.grid.map((cell) => (
-            <GridCell
-              key={`cell-${cell.id}`}
-              cellData={cell}
-              cellSize={cellSize}
-              clickHandler={cellClickHandler}
-            />
-          ))}
+    <>
+      <div className="flex justify-center mt-10">
+        <div
+          className="flex flex-wrap border box-border"
+          style={{ width: gridSize }}
+        >
+          {sudokuData &&
+            sudokuData.grid.map((cell) => (
+              <GridCell
+                key={`cell-${cell.id}`}
+                cellData={cell}
+                cellSize={cellSize}
+                clickHandler={cellClickHandler}
+              />
+            ))}
+        </div>
       </div>
-    </div>
+      {showSolver && (
+        <div className="text-center mt-10">
+          <button
+            className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+            onClick={() => {
+              console.log('test');
+              dispatch({ type: 'Solve' });
+            }}
+          >
+            Solve
+          </button>
+        </div>
+      )}
+    </>
   );
 };
 
