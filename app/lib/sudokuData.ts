@@ -166,10 +166,11 @@ export class SudokuData {
     }
   };
 
-  // Untested
   calculateCellPossibilities = () =>
     this.grid.forEach((cell) => {
-      if (!cell.number) {
+      if (cell.number) {
+        cell.possibilities = [];
+      } else {
         cell.possibilities = cell.allAssociations.reduce(
           (possibilities, associatedCell) => {
             return associatedCell.number &&
@@ -182,7 +183,6 @@ export class SudokuData {
       }
     });
 
-  // Untested
   populateCellsWithSinglePossibility = () => {
     this.grid.forEach((cell) => {
       if (!cell.number && cell.possibilities.length === 1) {
@@ -191,7 +191,6 @@ export class SudokuData {
     });
   };
 
-  // Untested
   getEmptyCellCount = () => this.grid.filter((c) => !c.number).length;
 
   // Untested

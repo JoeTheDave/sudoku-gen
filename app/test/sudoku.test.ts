@@ -260,12 +260,100 @@ describe('If SudokuData.toggleActiveCellPossibility is called', () => {
   });
 });
 
-describe('If SudokuData.clearActiveCell is called', () => {
+describe('When SudokuData.clearActiveCell is called', () => {
   it('should clear any existing active cell.', () => {
     const data = new SudokuData();
     data.setActiveCell(40);
     data.clearActiveCell();
     expect(data.grid[40].active).toBe(false);
     expect(data.activeCell).toBe(null);
+  });
+});
+
+describe('When SudokuData.calculateCellPossibilities is called', () => {
+  it('should populate appropriate number possibilities for all cells.', () => {
+    const data = new SudokuData();
+    data.grid[0].number = 1;
+    data.grid[1].number = 2;
+    data.grid[2].number = 3;
+    data.grid[3].number = 4;
+    data.grid[4].number = 5;
+    data.grid[22].number = 9;
+    data.grid[26].number = 3;
+    data.grid[32].number = 6;
+    data.calculateCellPossibilities();
+    expect(data.grid[5].possibilities[0]).toBe(7);
+    expect(data.grid[5].possibilities[1]).toBe(8);
+    expect(data.grid[23].possibilities[0]).toBe(1);
+    expect(data.grid[23].possibilities[1]).toBe(2);
+    expect(data.grid[23].possibilities[2]).toBe(7);
+    expect(data.grid[23].possibilities[3]).toBe(8);
+  });
+});
+
+describe('When SudokuData.populateCellsWithSinglePossibility is called', () => {
+  it('should populate a number into every cell that has only 1 possibility.', () => {
+    const data = new SudokuData();
+    data.grid[0].number = 1;
+    data.grid[1].number = 2;
+    data.grid[2].number = 3;
+    data.grid[4].number = 5;
+    data.grid[5].number = 6;
+    data.grid[6].number = 7;
+    data.grid[7].number = 8;
+    data.grid[8].number = 9;
+    data.grid[9].number = 4;
+    data.grid[11].number = 6;
+    data.grid[18].number = 7;
+    data.grid[19].number = 8;
+    data.grid[20].number = 9;
+    data.grid[38].number = 1;
+    data.grid[47].number = 2;
+    data.grid[56].number = 4;
+    data.grid[65].number = 5;
+    data.grid[74].number = 8;
+    data.calculateCellPossibilities();
+    expect(data.grid.filter((c) => c.possibilities.length === 1).length).toBe(
+      3,
+    );
+    expect(data.grid.filter((c) => !!c.number).length).toBe(18);
+    data.populateCellsWithSinglePossibility();
+    data.calculateCellPossibilities();
+    expect(data.grid.filter((c) => c.possibilities.length === 1).length).toBe(
+      0,
+    );
+    expect(data.grid.filter((c) => !!c.number).length).toBe(21);
+    expect(data.grid[3].number).toBe(4);
+    expect(data.grid[10].number).toBe(5);
+    expect(data.grid[29].number).toBe(7);
+  });
+});
+
+describe('When SudokuData.getEmptyCellCount is called', () => {
+  it('should return the number of cells in the grid that do not have a number assigned.', () => {
+    const data = new SudokuData();
+    expect(data.getEmptyCellCount()).toBe(81);
+    data.grid[0].number = 1;
+    data.grid[12].number = 2;
+    data.grid[24].number = 3;
+    expect(data.getEmptyCellCount()).toBe(78);
+    data.grid[44].number = 5;
+    data.grid[56].number = 6;
+    data.grid[61].number = 7;
+    data.grid[73].number = 8;
+    expect(data.getEmptyCellCount()).toBe(74);
+    data.grid[8].number = 9;
+    data.grid[26].number = 4;
+    data.grid[11].number = 6;
+    data.grid[18].number = 7;
+    data.grid[59].number = 8;
+    expect(data.getEmptyCellCount()).toBe(69);
+    data.grid[20].number = 9;
+    data.grid[38].number = 1;
+    data.grid[47].number = 2;
+    data.grid[51].number = 4;
+    data.grid[65].number = 5;
+    data.grid[74].number = 8;
+    expect(data.getEmptyCellCount()).toBe(63);
   });
 });
