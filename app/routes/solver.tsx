@@ -4,7 +4,7 @@ import SudokuGrid from '~/components/SudokuGrid';
 import dataSetup from '~/lib/dataSetup';
 
 export default function SolverRoute() {
-  const sudokuData = dataSetup.hard(new SudokuData());
+  const sudokuData = dataSetup.extreme(new SudokuData());
 
   return (
     <div>

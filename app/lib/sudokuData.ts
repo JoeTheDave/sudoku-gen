@@ -193,16 +193,13 @@ export class SudokuData {
 
   getEmptyCellCount = () => this.grid.filter((c) => !c.number).length;
 
-  // Untested
   getRowListBySeed = (seed: number) =>
     range(seed * 9, seed * 9 + 9).map((cellId) => this.grid[cellId]);
 
-  // Untested
   getColListBySeed = (seed: number) =>
     range(seed, 81, 9).map((cellId) => this.grid[cellId]);
 
-  // Untested
-  getGridListBSeed = (seed: number) => {
+  getGridListBySeed = (seed: number) => {
     const gridRoot = (seed % 3) * 3 + Math.floor(seed / 3) * 27;
     return flatten(
       range(gridRoot, gridRoot + 27, 9).map((gridRowRoot) =>
@@ -211,13 +208,13 @@ export class SudokuData {
     ).map((cellId) => this.grid[cellId]);
   };
 
-  // Untested
-  determineSingleOptionInListForNumber = (
+  populateSingleOptionInListForNumber = (
     listGenerator: (seed: number) => Cell[],
   ) =>
-    range(0, 9).forEach((rowSeed) => {
+    range(0, 9).forEach((listSeed) => {
+      const cellList: Cell[] = listGenerator(listSeed);
       range(1, 10).forEach((num) => {
-        const options: Cell[] = listGenerator(rowSeed).filter((cell) =>
+        const options: Cell[] = cellList.filter((cell) =>
           cell.possibilities.includes(num),
         );
         if (options.length === 1) {
@@ -226,7 +223,6 @@ export class SudokuData {
       });
     });
 
-  // Untested
   // Solves Easy but not Medium
   executeAlphaSolution = () => {
     let exitCondition = false;
@@ -237,22 +233,18 @@ export class SudokuData {
       let emptyCount = this.getEmptyCellCount();
       if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
         exitCondition = true;
+        this.calculateCellPossibilities();
       }
     } while (!exitCondition);
   };
 
-  // Untested
   // Solves Medium but not Hard
   executeBetaSolution = () => {
     let exitCondition = false;
     do {
       let preliminaryEmptyCount = this.getEmptyCellCount();
       this.calculateCellPossibilities();
-      this.determineSingleOptionInListForNumber(this.getRowListBySeed);
-      this.calculateCellPossibilities();
-      this.determineSingleOptionInListForNumber(this.getColListBySeed);
-      this.calculateCellPossibilities();
-      this.determineSingleOptionInListForNumber(this.getGridListBSeed);
+      this.populateSingleOptionInListForNumber(this.getGridListBySeed);
       this.executeAlphaSolution();
       let emptyCount = this.getEmptyCellCount();
       if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
@@ -261,8 +253,26 @@ export class SudokuData {
     } while (!exitCondition);
   };
 
-  // Untested
+  // Solves Hard but not Extreme
+  executeDeltaSolution = () => {
+    let exitCondition = false;
+    do {
+      let preliminaryEmptyCount = this.getEmptyCellCount();
+      this.calculateCellPossibilities();
+      this.populateSingleOptionInListForNumber(this.getRowListBySeed);
+      this.calculateCellPossibilities();
+      this.populateSingleOptionInListForNumber(this.getColListBySeed);
+      this.calculateCellPossibilities();
+      this.populateSingleOptionInListForNumber(this.getGridListBySeed);
+      this.executeAlphaSolution();
+      let emptyCount = this.getEmptyCellCount();
+      if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
+        exitCondition = true;
+      }
+    } while (!exitCondition);
+  };
+
   solve = () => {
-    this.executeBetaSolution();
+    this.executeDeltaSolution();
   };
 }

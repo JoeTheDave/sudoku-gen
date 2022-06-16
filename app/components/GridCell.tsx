@@ -10,11 +10,13 @@ interface GridCellProps {
   cellSize: number;
 }
 
+const showGridIds = false;
+
 const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
   return (
     <div
       key={`cell-${cellData.id}`}
-      className={'border box-border'}
+      className={'border box-border relative'}
       data-id={cellData.id}
       style={{
         width: cellSize,
@@ -72,6 +74,9 @@ const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
             </div>
           ))}
         </div>
+      )}
+      {showGridIds && (
+        <div className="absolute top-1 left-1 text-xs">{cellData.id}</div>
       )}
     </div>
   );

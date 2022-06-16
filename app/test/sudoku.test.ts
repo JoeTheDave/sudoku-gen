@@ -1,4 +1,5 @@
 import { SudokuData } from '~/lib/sudokuData';
+import dataSetup from '~/lib/dataSetup';
 
 describe('When SudokuData is instantiated', () => {
   const data = new SudokuData();
@@ -355,5 +356,111 @@ describe('When SudokuData.getEmptyCellCount is called', () => {
     data.grid[65].number = 5;
     data.grid[74].number = 8;
     expect(data.getEmptyCellCount()).toBe(63);
+  });
+});
+
+describe('When SudokuData.getRowListBySeed is called', () => {
+  it('should return a list of all cells in the row in which the row number is the seed.', () => {
+    const data = new SudokuData();
+    const list1 = data.getRowListBySeed(0);
+    expect(list1.length).toBe(9);
+    expect(list1[0].id).toBe(0);
+    expect(list1[3].id).toBe(3);
+    expect(list1[6].id).toBe(6);
+    const list2 = data.getRowListBySeed(3);
+    expect(list2[1].id).toBe(28);
+    expect(list2[4].id).toBe(31);
+    expect(list2[7].id).toBe(34);
+  });
+});
+
+describe('When SudokuData.getColListBySeed is called', () => {
+  it('should return a list of all cells in the column in which the column number is the seed.', () => {
+    const data = new SudokuData();
+    const list1 = data.getColListBySeed(0);
+    expect(list1.length).toBe(9);
+    expect(list1[0].id).toBe(0);
+    expect(list1[3].id).toBe(27);
+    expect(list1[6].id).toBe(54);
+    const list2 = data.getColListBySeed(3);
+    expect(list2[1].id).toBe(12);
+    expect(list2[4].id).toBe(39);
+    expect(list2[7].id).toBe(66);
+  });
+});
+
+describe('When SudokuData.getGridListBySeed is called', () => {
+  it('should return a list of all cells in the 3x3 grid in which the grid number is the seed.', () => {
+    const data = new SudokuData();
+    const list1 = data.getGridListBySeed(0);
+    expect(list1.length).toBe(9);
+    expect(list1[0].id).toBe(0);
+    expect(list1[4].id).toBe(10);
+    expect(list1[8].id).toBe(20);
+    const list2 = data.getGridListBySeed(4);
+    expect(list2[1].id).toBe(31);
+    expect(list2[3].id).toBe(39);
+    expect(list2[5].id).toBe(41);
+    expect(list2[7].id).toBe(49);
+  });
+});
+
+describe('When SudokuData.populateSingleOptionInListForNumber is called', () => {
+  it('should analyze the list of cells passed for any numbers in which only one cell is an option and populate that cell with that number.', () => {
+    const data = new SudokuData();
+    data.grid[3].number = 7;
+    data.grid[13].number = 5;
+    data.grid[15].number = 7;
+    data.grid[25].number = 5;
+    data.grid[28].number = 7;
+    data.grid[38].number = 5;
+    data.grid[56].number = 7;
+    data.grid[72].number = 5;
+    data.calculateCellPossibilities();
+    expect(data.grid.filter((c) => !!c.number).length).toBe(8);
+    data.populateSingleOptionInListForNumber(data.getGridListBySeed);
+    data.calculateCellPossibilities();
+    expect(data.grid.filter((c) => !!c.number).length).toBe(10);
+    expect(data.grid[1].number).toBe(5);
+    expect(data.grid[18].number).toBe(7);
+  });
+});
+
+describe('When SudokuData.executeAlphaSolution is called', () => {
+  it('should be able to solve the easy puzzle setup.', () => {
+    const data = dataSetup.easy(new SudokuData());
+    data.executeAlphaSolution();
+    expect(data.getEmptyCellCount()).toBe(0);
+  });
+  it('should not be able to solve the medium puzzle setup.', () => {
+    const data = dataSetup.medium(new SudokuData());
+    data.executeAlphaSolution();
+    expect(data.getEmptyCellCount()).not.toBe(0);
+  });
+});
+
+describe('When SudokuData.executeBetaSolution is called', () => {
+  it('should be able to solve the medium puzzle setup.', () => {
+    const data = dataSetup.medium(new SudokuData());
+    data.executeBetaSolution();
+    expect(data.getEmptyCellCount()).toBe(0);
+  });
+  it('should not be able to solve the hard puzzle setup.', () => {
+    const data = dataSetup.hard(new SudokuData());
+    data.executeBetaSolution();
+    expect(data.getEmptyCellCount()).not.toBe(0);
+  });
+});
+
+describe('When SudokuData.executeDeltaSolution is called', () => {
+  it('should be able to solve the hard puzzle setup.', () => {
+    const data = dataSetup.hard(new SudokuData());
+    data.executeDeltaSolution();
+    expect(data.getEmptyCellCount()).toBe(0);
+  });
+  it('should not be able to solve the extreme puzzle setup.', () => {
+    const data = dataSetup.extreme(new SudokuData());
+    data.executeDeltaSolution();
+    expect(data.getEmptyCellCount()).not.toBe(0);
   });
 });
