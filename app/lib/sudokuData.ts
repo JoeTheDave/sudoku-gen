@@ -14,9 +14,12 @@ export class Cell {
   colAssociations: Cell[];
   gridAssociations: Cell[];
   allAssociations: Cell[];
+  rowId: number;
+  colId: number;
+  gridId: number;
 
-  constructor(id: number) {
-    this.id = id;
+  constructor(rowId: number, colId: number) {
+    this.id = rowId * 9 + colId;
     this.north = null as unknown as Cell;
     this.east = null as unknown as Cell;
     this.south = null as unknown as Cell;
@@ -29,6 +32,9 @@ export class Cell {
     this.colAssociations = [];
     this.gridAssociations = [];
     this.allAssociations = [];
+    this.rowId = rowId;
+    this.colId = colId;
+    this.gridId = Math.floor(rowId / 3) * 3 + Math.floor(colId / 3);
   }
 
   isActiveCellAssociation = () =>
@@ -49,7 +55,19 @@ export class SudokuData {
       this.grid = data.grid;
       this.activeCell = data.activeCell;
     } else {
-      this.grid = range(81).map((i) => new Cell(i));
+      this.grid = flatten(
+        range(9).reduce(
+          (rows, rowId) => [
+            ...rows,
+            range(9).reduce(
+              (cells, colId) => [...cells, new Cell(rowId, colId)],
+              [] as Cell[],
+            ),
+          ],
+          [] as Cell[][],
+        ),
+      );
+
       this.grid.forEach((cell) => {
         cell.east =
           this.grid[(cell.id + 1) % 9 === 0 ? cell.id - 8 : cell.id + 1];
@@ -193,14 +211,14 @@ export class SudokuData {
 
   getEmptyCellCount = () => this.grid.filter((c) => !c.number).length;
 
-  getRowListBySeed = (seed: number) =>
-    range(seed * 9, seed * 9 + 9).map((cellId) => this.grid[cellId]);
+  getRowListByRowId = (rowId: number) =>
+    range(rowId * 9, rowId * 9 + 9).map((cellId) => this.grid[cellId]);
 
-  getColListBySeed = (seed: number) =>
-    range(seed, 81, 9).map((cellId) => this.grid[cellId]);
+  getColListByColId = (colId: number) =>
+    range(colId, 81, 9).map((cellId) => this.grid[cellId]);
 
-  getGridListBySeed = (seed: number) => {
-    const gridRoot = (seed % 3) * 3 + Math.floor(seed / 3) * 27;
+  getGridListByGridId = (gridId: number) => {
+    const gridRoot = (gridId % 3) * 3 + Math.floor(gridId / 3) * 27;
     return flatten(
       range(gridRoot, gridRoot + 27, 9).map((gridRowRoot) =>
         range(gridRowRoot, gridRowRoot + 3),
@@ -209,10 +227,10 @@ export class SudokuData {
   };
 
   populateSingleOptionInListForNumber = (
-    listGenerator: (seed: number) => Cell[],
+    listGenerator: (entityId: number) => Cell[],
   ) =>
-    range(0, 9).forEach((listSeed) => {
-      const cellList: Cell[] = listGenerator(listSeed);
+    range(0, 9).forEach((entityId) => {
+      const cellList: Cell[] = listGenerator(entityId);
       range(1, 10).forEach((num) => {
         const options: Cell[] = cellList.filter((cell) =>
           cell.possibilities.includes(num),
@@ -222,6 +240,55 @@ export class SudokuData {
         }
       });
     });
+
+  getTotalPossibilitiesCount = () =>
+    this.grid.reduce(
+      (possibilitiesCount, cell) =>
+        possibilitiesCount + cell.possibilities.length,
+      0,
+    );
+
+  eliminateSkeweredPossibilities = () => {
+    range(9).forEach((gridId) => {
+      const gridCells = this.getGridListByGridId(gridId);
+      range(1, 10).forEach((num) => {
+        const options = gridCells.filter((cell) =>
+          cell.possibilities.includes(num),
+        );
+        const [possibilityRows, possibilityCols] = options.reduce(
+          (collection, option) => [
+            uniq([...collection[0], option.rowId]),
+            uniq([...collection[1], option.colId]),
+          ],
+          [[], []] as number[][],
+        );
+        if (possibilityRows.length === 1) {
+          this.getRowListByRowId(possibilityRows[0]).forEach((rowCell) => {
+            if (
+              rowCell.gridId !== gridId &&
+              rowCell.possibilities.includes(num)
+            ) {
+              rowCell.possibilities = rowCell.possibilities.filter(
+                (possibility) => possibility !== num,
+              );
+            }
+          });
+        }
+        if (possibilityCols.length === 1) {
+          this.getColListByColId(possibilityRows[0]).forEach((colCell) => {
+            if (
+              colCell.gridId !== gridId &&
+              colCell.possibilities.includes(num)
+            ) {
+              colCell.possibilities = colCell.possibilities.filter(
+                (possibility) => possibility !== num,
+              );
+            }
+          });
+        }
+      });
+    });
+  };
 
   // Solves Easy but not Medium
   executeAlphaSolution = () => {
@@ -244,7 +311,7 @@ export class SudokuData {
     do {
       let preliminaryEmptyCount = this.getEmptyCellCount();
       this.calculateCellPossibilities();
-      this.populateSingleOptionInListForNumber(this.getGridListBySeed);
+      this.populateSingleOptionInListForNumber(this.getGridListByGridId);
       this.executeAlphaSolution();
       let emptyCount = this.getEmptyCellCount();
       if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
@@ -259,11 +326,30 @@ export class SudokuData {
     do {
       let preliminaryEmptyCount = this.getEmptyCellCount();
       this.calculateCellPossibilities();
-      this.populateSingleOptionInListForNumber(this.getRowListBySeed);
+      this.populateSingleOptionInListForNumber(this.getRowListByRowId);
       this.calculateCellPossibilities();
-      this.populateSingleOptionInListForNumber(this.getColListBySeed);
+      this.populateSingleOptionInListForNumber(this.getColListByColId);
       this.calculateCellPossibilities();
-      this.populateSingleOptionInListForNumber(this.getGridListBySeed);
+      this.populateSingleOptionInListForNumber(this.getGridListByGridId);
+      this.executeAlphaSolution();
+      let emptyCount = this.getEmptyCellCount();
+      if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
+        exitCondition = true;
+      }
+    } while (!exitCondition);
+  };
+
+  // Solves Hard but not Extreme
+  executeGammaSolution = () => {
+    let exitCondition = false;
+    do {
+      let preliminaryEmptyCount = this.getEmptyCellCount();
+      this.calculateCellPossibilities();
+      this.populateSingleOptionInListForNumber(this.getRowListByRowId);
+      this.calculateCellPossibilities();
+      this.populateSingleOptionInListForNumber(this.getColListByColId);
+      this.calculateCellPossibilities();
+      this.populateSingleOptionInListForNumber(this.getGridListByGridId);
       this.executeAlphaSolution();
       let emptyCount = this.getEmptyCellCount();
       if (emptyCount === 0 || emptyCount === preliminaryEmptyCount) {
@@ -273,6 +359,24 @@ export class SudokuData {
   };
 
   solve = () => {
-    this.executeDeltaSolution();
+    this.executeGammaSolution();
+    console.log(this.getTotalPossibilitiesCount());
+    this.eliminateSkeweredPossibilities();
+    console.log(this.getTotalPossibilitiesCount());
+
+    // let exitCondition = false;
+    // if (gammSolution) {
+    //   do {
+    //     let preliminaryPossibilitiesCount = this.getTotalPossibilitiesCount();
+    //     this.eliminateSkeweredPossibilities();
+    //     let PossibilitiesCount = this.getTotalPossibilitiesCount();
+    //     if (
+    //       PossibilitiesCount === 0 ||
+    //       PossibilitiesCount === preliminaryPossibilitiesCount
+    //     ) {
+    //       exitCondition = true;
+    //     }
+    //   } while (!exitCondition);
+    // }
   };
 }

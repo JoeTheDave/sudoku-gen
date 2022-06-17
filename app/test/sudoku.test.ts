@@ -1,8 +1,23 @@
 import { SudokuData } from '~/lib/sudokuData';
 import dataSetup from '~/lib/dataSetup';
+import { uniq } from 'lodash';
 
 describe('When SudokuData is instantiated', () => {
   const data = new SudokuData();
+  it('Should have cells with appropriate row, column, and grid ids.', () => {
+    expect(data.grid[0].rowId).toBe(0);
+    expect(data.grid[0].colId).toBe(0);
+    expect(data.grid[0].gridId).toBe(0);
+    expect(data.grid[12].rowId).toBe(1);
+    expect(data.grid[12].colId).toBe(3);
+    expect(data.grid[12].gridId).toBe(1);
+    expect(data.grid[68].rowId).toBe(7);
+    expect(data.grid[68].colId).toBe(5);
+    expect(data.grid[68].gridId).toBe(7);
+    expect(data.grid[80].rowId).toBe(8);
+    expect(data.grid[80].colId).toBe(8);
+    expect(data.grid[80].gridId).toBe(8);
+  });
   it('Should have cells with appropriate east neighbor relationships.', () => {
     expect(data.grid[0].east).not.toBeNull();
     expect(data.grid[0].east.id).toBe(1);
@@ -359,45 +374,45 @@ describe('When SudokuData.getEmptyCellCount is called', () => {
   });
 });
 
-describe('When SudokuData.getRowListBySeed is called', () => {
-  it('should return a list of all cells in the row in which the row number is the seed.', () => {
+describe('When SudokuData.getRowListByRowId is called', () => {
+  it('should return a list of all cells in the row with the given rowId.', () => {
     const data = new SudokuData();
-    const list1 = data.getRowListBySeed(0);
+    const list1 = data.getRowListByRowId(0);
     expect(list1.length).toBe(9);
     expect(list1[0].id).toBe(0);
     expect(list1[3].id).toBe(3);
     expect(list1[6].id).toBe(6);
-    const list2 = data.getRowListBySeed(3);
+    const list2 = data.getRowListByRowId(3);
     expect(list2[1].id).toBe(28);
     expect(list2[4].id).toBe(31);
     expect(list2[7].id).toBe(34);
   });
 });
 
-describe('When SudokuData.getColListBySeed is called', () => {
-  it('should return a list of all cells in the column in which the column number is the seed.', () => {
+describe('When SudokuData.getColListByColId is called', () => {
+  it('should return a list of all cells in the column with the given colId.', () => {
     const data = new SudokuData();
-    const list1 = data.getColListBySeed(0);
+    const list1 = data.getColListByColId(0);
     expect(list1.length).toBe(9);
     expect(list1[0].id).toBe(0);
     expect(list1[3].id).toBe(27);
     expect(list1[6].id).toBe(54);
-    const list2 = data.getColListBySeed(3);
+    const list2 = data.getColListByColId(3);
     expect(list2[1].id).toBe(12);
     expect(list2[4].id).toBe(39);
     expect(list2[7].id).toBe(66);
   });
 });
 
-describe('When SudokuData.getGridListBySeed is called', () => {
-  it('should return a list of all cells in the 3x3 grid in which the grid number is the seed.', () => {
+describe('When SudokuData.getGridListByGridId is called', () => {
+  it('should return a list of all cells in the 3x3 grid with the given gridId.', () => {
     const data = new SudokuData();
-    const list1 = data.getGridListBySeed(0);
+    const list1 = data.getGridListByGridId(0);
     expect(list1.length).toBe(9);
     expect(list1[0].id).toBe(0);
     expect(list1[4].id).toBe(10);
     expect(list1[8].id).toBe(20);
-    const list2 = data.getGridListBySeed(4);
+    const list2 = data.getGridListByGridId(4);
     expect(list2[1].id).toBe(31);
     expect(list2[3].id).toBe(39);
     expect(list2[5].id).toBe(41);
@@ -418,11 +433,56 @@ describe('When SudokuData.populateSingleOptionInListForNumber is called', () => 
     data.grid[72].number = 5;
     data.calculateCellPossibilities();
     expect(data.grid.filter((c) => !!c.number).length).toBe(8);
-    data.populateSingleOptionInListForNumber(data.getGridListBySeed);
+    data.populateSingleOptionInListForNumber(data.getGridListByGridId);
     data.calculateCellPossibilities();
     expect(data.grid.filter((c) => !!c.number).length).toBe(10);
     expect(data.grid[1].number).toBe(5);
     expect(data.grid[18].number).toBe(7);
+  });
+});
+
+describe('When SudokuData.getTotalPossibilitiesCount is called', () => {
+  it('should return the sum total of all possibilities from all cells.', () => {
+    const data = new SudokuData();
+    data.calculateCellPossibilities();
+    expect(data.getTotalPossibilitiesCount()).toBe(9 * 9 * 9);
+    data.grid[0].number = 1;
+    data.grid[8].number = 2;
+    data.grid[72].number = 3;
+    data.grid[80].number = 4;
+    data.calculateCellPossibilities();
+    expect(data.getTotalPossibilitiesCount()).toBe(
+      9 * 9 * 9 - (7 * 2 * 4 + 4 * 4 + 4 * 9),
+    );
+  });
+});
+
+describe('When SudokuData.eliminateSkeweredPossibilities is called', () => {
+  it('should reduce possibilities in cells by use of the skewer strategy.', () => {
+    const data = new SudokuData();
+    data.grid[0].number = 1;
+    data.grid[1].number = 2;
+    data.grid[2].number = 3;
+    data.grid[9].number = 4;
+    data.grid[10].number = 5;
+    data.grid[11].number = 6;
+    data.calculateCellPossibilities();
+    const rowsHavingTargetPossibility = uniq(
+      data
+        .getGridListByGridId(0)
+        .filter((cell) => cell.possibilities.includes(7))
+        .map((cell) => cell.rowId),
+    ).length;
+    expect(rowsHavingTargetPossibility).toBe(1);
+    let cellsInTargetRowWithTargetPossibility = data
+      .getRowListByRowId(2)
+      .filter((cell) => cell.possibilities.includes(7));
+    expect(cellsInTargetRowWithTargetPossibility.length).toBe(9);
+    data.eliminateSkeweredPossibilities();
+    cellsInTargetRowWithTargetPossibility = data
+      .getRowListByRowId(2)
+      .filter((cell) => cell.possibilities.includes(7));
+    expect(cellsInTargetRowWithTargetPossibility.length).toBe(3);
   });
 });
 
