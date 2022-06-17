@@ -524,3 +524,16 @@ describe('When SudokuData.executeDeltaSolution is called', () => {
     expect(data.getEmptyCellCount()).not.toBe(0);
   });
 });
+
+describe('When SudokuData.executeGammaSolution is called', () => {
+  it('should be able to solve the extreme puzzle setup.', () => {
+    const data = dataSetup.extreme(new SudokuData());
+    data.executeGammaSolution();
+    expect(data.getEmptyCellCount()).toBe(0);
+  });
+  it('should not be able to solve the evil puzzle setup.', () => {
+    const data = dataSetup.evil(new SudokuData());
+    data.executeDeltaSolution();
+    expect(data.getEmptyCellCount()).not.toBe(0);
+  });
+});
