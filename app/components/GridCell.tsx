@@ -16,7 +16,12 @@ const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
   return (
     <div
       key={`cell-${cellData.id}`}
-      className={'border box-border relative'}
+      className={cx('border box-border relative', {
+        'border-r-gray-300': cellData.colId === 2 || cellData.colId === 5,
+        'border-l-gray-300': cellData.colId === 3 || cellData.colId === 6,
+        'border-b-gray-300': cellData.rowId === 2 || cellData.rowId === 5,
+        'border-t-gray-300': cellData.rowId === 3 || cellData.rowId === 6,
+      })}
       data-id={cellData.id}
       style={{
         width: cellSize,
@@ -57,20 +62,23 @@ const GridCell: FC<GridCellProps> = ({ cellData, clickHandler, cellSize }) => {
                 height: Math.floor(cellSize / 3),
               }}
             >
-              {[1, 2, 3].map((c) => (
-                <div
-                  key={`${cellData.id}-note-col-${c}`}
-                  className="flex items-center justify-center"
-                  style={{
-                    width: Math.floor(cellSize / 3),
-                    fontSize: Math.floor((cellSize / 3) * 0.75),
-                  }}
-                >
-                  {cellData.possibilities.includes((r - 1) * 3 + c)
-                    ? (r - 1) * 3 + c
-                    : ''}
-                </div>
-              ))}
+              {[1, 2, 3].map((c) => {
+                const possibility = (r - 1) * 3 + c;
+                return (
+                  <div
+                    key={`${cellData.id}-note-col-${c}`}
+                    className="flex items-center justify-center"
+                    style={{
+                      width: Math.floor(cellSize / 3),
+                      fontSize: Math.floor((cellSize / 3) * 0.75),
+                    }}
+                  >
+                    {cellData.possibilities.includes(possibility)
+                      ? possibility
+                      : ''}
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>

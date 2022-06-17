@@ -49,11 +49,13 @@ export class Cell {
 export class SudokuData {
   grid: Cell[];
   activeCell: Cell | null;
+  useSkewerStrategy: boolean;
 
   constructor(data: SudokuData | null = null) {
     if (data) {
       this.grid = data.grid;
       this.activeCell = data.activeCell;
+      this.useSkewerStrategy = data.useSkewerStrategy;
     } else {
       this.grid = flatten(
         range(9).reduce(
@@ -104,6 +106,7 @@ export class SudokuData {
         ]);
       });
       this.activeCell = null;
+      this.useSkewerStrategy = false;
     }
   }
 
@@ -184,7 +187,7 @@ export class SudokuData {
     }
   };
 
-  calculateCellPossibilities = () =>
+  calculateCellPossibilities = () => {
     this.grid.forEach((cell) => {
       if (cell.number) {
         cell.possibilities = [];
@@ -200,6 +203,21 @@ export class SudokuData {
         );
       }
     });
+    let exitCondition = false;
+    if (this.useSkewerStrategy) {
+      do {
+        const preliminaryPossibilitiesCount = this.getTotalPossibilitiesCount();
+        this.eliminateSkeweredPossibilities();
+        const PossibilitiesCount = this.getTotalPossibilitiesCount();
+        if (
+          PossibilitiesCount === 0 ||
+          PossibilitiesCount === preliminaryPossibilitiesCount
+        ) {
+          exitCondition = true;
+        }
+      } while (!exitCondition);
+    }
+  };
 
   populateCellsWithSinglePossibility = () => {
     this.grid.forEach((cell) => {
@@ -275,7 +293,7 @@ export class SudokuData {
           });
         }
         if (possibilityCols.length === 1) {
-          this.getColListByColId(possibilityRows[0]).forEach((colCell) => {
+          this.getColListByColId(possibilityCols[0]).forEach((colCell) => {
             if (
               colCell.gridId !== gridId &&
               colCell.possibilities.includes(num)
@@ -341,6 +359,7 @@ export class SudokuData {
 
   // Solves Hard but not Extreme
   executeGammaSolution = () => {
+    this.useSkewerStrategy = true;
     let exitCondition = false;
     do {
       let preliminaryEmptyCount = this.getEmptyCellCount();
@@ -360,23 +379,5 @@ export class SudokuData {
 
   solve = () => {
     this.executeGammaSolution();
-    console.log(this.getTotalPossibilitiesCount());
-    this.eliminateSkeweredPossibilities();
-    console.log(this.getTotalPossibilitiesCount());
-
-    // let exitCondition = false;
-    // if (gammSolution) {
-    //   do {
-    //     let preliminaryPossibilitiesCount = this.getTotalPossibilitiesCount();
-    //     this.eliminateSkeweredPossibilities();
-    //     let PossibilitiesCount = this.getTotalPossibilitiesCount();
-    //     if (
-    //       PossibilitiesCount === 0 ||
-    //       PossibilitiesCount === preliminaryPossibilitiesCount
-    //     ) {
-    //       exitCondition = true;
-    //     }
-    //   } while (!exitCondition);
-    // }
   };
 }
