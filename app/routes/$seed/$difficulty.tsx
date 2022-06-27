@@ -34,6 +34,7 @@ export default function DifficultyRoute() {
   }, [params.difficulty]);
 
   const sudokuData = new SudokuData();
+  sudokuData.generateRandomGridFromSeed(params.seed);
 
   return (
     <div>

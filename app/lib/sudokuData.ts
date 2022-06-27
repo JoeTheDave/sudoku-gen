@@ -1,4 +1,5 @@
-import { compact, range, uniq, sortBy, flatten, values } from 'lodash';
+import { compact, range, uniq, sortBy, flatten, values, keys } from 'lodash';
+import { Random } from '~/lib/random';
 
 export class Cell {
   id: number;
@@ -365,6 +366,80 @@ export class SudokuData {
       }
     });
 
+  // Untested
+  getEmptyCells = () => this.grid.filter((cell) => !cell.number);
+
+  // Untested
+  getEmptyCellsWithPossibilities = () =>
+    this.getEmptyCells().filter((cell) => cell.possibilities.length);
+
+  // Untested
+  getSmallestConflictValuesForCell = (cell: Cell) => {
+    const conflictsReport = range(1, 10).reduce((outcomes, number) => {
+      outcomes[`${number}`] = cell.allAssociations.filter(
+        (association) => association.number === number,
+      ).length;
+      return outcomes;
+    }, {} as { [key: string]: number });
+    const smallestConflictCountKey = keys(conflictsReport).sort((a, b) =>
+      conflictsReport[a] > conflictsReport[b] ? 1 : -1,
+    )[0];
+    const smallestConflictCountValue =
+      conflictsReport[smallestConflictCountKey];
+    return keys(conflictsReport)
+      .filter((key) => conflictsReport[key] === smallestConflictCountValue)
+      .map((val) => parseInt(val));
+  };
+
+  // Untested
+  generateRandomGridFromSeed = (randomSeed: string) => {
+    const rand = new Random(randomSeed);
+    this.grid.forEach((cell) => {
+      cell.number = null;
+      cell.active = false;
+      cell.userDefined = false;
+      cell.possibilities = [];
+    });
+    this.activeCell = null;
+
+    let exitCondition = false;
+    let iterationCount = 0;
+    do {
+      if (iterationCount >= 120) {
+        range(20).forEach(() => {
+          const filledCells = this.grid.filter((cell) => cell.number);
+          rand.randomSelection(filledCells).number = null;
+        });
+        iterationCount = 80;
+      }
+      this.calculateCellPossibilities();
+
+      let selectionOptions = this.getEmptyCellsWithPossibilities();
+      if (selectionOptions.length === 0) {
+        selectionOptions = this.getEmptyCells();
+      }
+      const selection = rand.randomSelection(selectionOptions);
+      if (selection.possibilities.length) {
+        selection.number = rand.randomSelection(selection.possibilities);
+      } else {
+        const forceNumber = rand.randomSelection(
+          this.getSmallestConflictValuesForCell(selection),
+        );
+        selection.number = forceNumber;
+        selection.allAssociations.forEach((associatedCell) => {
+          if (associatedCell.number === selection.number) {
+            associatedCell.number = null;
+          }
+        });
+      }
+      this.calculateCellPossibilities();
+      iterationCount += 1;
+      if (this.getEmptyCells().length === 0) {
+        exitCondition = true;
+      }
+    } while (!exitCondition);
+  };
+
   // Solves Easy but not Medium
   executeAlphaSolution = () => {
     let exitCondition = false;
@@ -437,7 +512,13 @@ export class SudokuData {
     this.useMatchedSetStrategy = false;
   };
 
+  executeOmegaSolution = () => {
+    throw new Error('Not Implemented');
+    // Can employ the Hidden Set strategy and the X-Wing strategy
+    // https://www.conceptispuzzles.com/index.aspx?uri=puzzle/sudoku/techniques
+  };
+
   solve = () => {
-    this.executeGammaSolution();
+    this.generateRandomGridFromSeed('test');
   };
 }

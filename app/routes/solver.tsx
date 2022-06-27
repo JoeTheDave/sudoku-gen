@@ -1,10 +1,8 @@
 import { SudokuData } from '~/lib/sudokuData';
 import SudokuGrid from '~/components/SudokuGrid';
 
-import dataSetup from '~/lib/dataSetup';
-
 export default function SolverRoute() {
-  const sudokuData = dataSetup.evil(new SudokuData());
+  const sudokuData = new SudokuData();
 
   return (
     <div>
