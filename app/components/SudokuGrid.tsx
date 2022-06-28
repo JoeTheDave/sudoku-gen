@@ -70,6 +70,12 @@ const SudokuGrid: FC<SudokuGridProps> = ({ data, showSolver }) => {
     if (num) {
       dispatch({ type: shifted ? 'SetNotation' : 'SetNumber', num });
     }
+    if ('!@#$%^&*('.includes(e.key)) {
+      dispatch({
+        type: 'SetNotation',
+        num: '!@#$%^&*('.indexOf(e.key) + 1,
+      });
+    }
     if (e.key === 'ArrowUp') {
       dispatch({ type: e.key });
     }

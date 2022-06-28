@@ -1,5 +1,17 @@
-import { compact, range, uniq, sortBy, flatten, values, keys } from 'lodash';
+import {
+  compact,
+  flatten,
+  intersection,
+  keys,
+  min,
+  range,
+  sortBy,
+  uniq,
+  values,
+} from 'lodash';
 import { Random } from '~/lib/random';
+
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'extreme' | 'evil';
 
 export class Cell {
   id: number;
@@ -440,6 +452,127 @@ export class SudokuData {
     } while (!exitCondition);
   };
 
+  // Untested
+  applyPuzzleData = (numberGrid: Cell[], applyIds: number[]) => {
+    applyIds.forEach((id) => (this.grid[id].number = numberGrid[id].number));
+  };
+
+  // Untested
+  runSolverForDifficulty = (difficulty: Difficulty) => {
+    switch (difficulty) {
+      case 'easy':
+        this.executeAlphaSolution();
+        break;
+      case 'medium':
+        this.executeBetaSolution();
+        break;
+      case 'hard':
+        this.executeDeltaSolution();
+        break;
+      case 'extreme':
+        this.executeGammaSolution();
+        break;
+      case 'evil':
+        this.executeOmegaSolution();
+        break;
+      default:
+        throw new Error('Unrecognized difficulty classification');
+    }
+  };
+
+  // Untested
+  getPreviousDifficulty = (difficulty: Difficulty) => {
+    switch (difficulty) {
+      case 'easy':
+        return 'gentle';
+      case 'medium':
+        return 'easy';
+      case 'hard':
+        return 'medium';
+      case 'extreme':
+        return 'hard';
+      case 'evil':
+        return 'extreme';
+      default:
+        throw new Error('Unrecognized difficulty classification');
+    }
+  };
+
+  // Untested
+  findFilledCandidateForPuzzle = (rand: Random, puzzleCells: number[]) => {
+    const collections = flatten(
+      range(9).map((i) => [
+        this.getRowListByRowId(i).map((c) => c.id),
+        this.getColListByColId(i).map((c) => c.id),
+        this.getGridListByGridId(i).map((c) => c.id),
+      ]),
+    );
+    const leastOccupancy = min(
+      collections.map(
+        (collection) => intersection(collection, puzzleCells).length,
+      ),
+    );
+    const collectionOptions = collections.filter(
+      (collection) =>
+        intersection(collection, puzzleCells).length === leastOccupancy,
+    );
+    const targetCollection = rand.randomSelection(collectionOptions);
+
+    return rand.randomSelection(
+      targetCollection.filter((num) => !puzzleCells.includes(num)),
+    );
+  };
+
+  // Untested
+  runPuzzleAttempt = (
+    solution: Cell[],
+    puzzleCells: number[],
+    difficulty: Difficulty,
+  ) => {
+    const attempt = new SudokuData();
+    attempt.applyPuzzleData(solution, puzzleCells);
+    attempt.runSolverForDifficulty(difficulty);
+
+    return attempt.getEmptyCellCount();
+  };
+
+  // Untested
+  generatePuzzle = (randomSeed: string, difficulty: Difficulty) => {
+    const rand = new Random(randomSeed);
+    const solutionGrid = new SudokuData();
+    solutionGrid.generateRandomGridFromSeed(randomSeed);
+    const previousDifficulty = this.getPreviousDifficulty(
+      difficulty,
+    ) as Difficulty;
+
+    const puzzleCells: number[] = [];
+    let exitCondition = false;
+    do {
+      puzzleCells.push(this.findFilledCandidateForPuzzle(rand, puzzleCells));
+      if (puzzleCells.length > 10) {
+        const canBeSolvedByTargetDifficulty =
+          this.runPuzzleAttempt(solutionGrid.grid, puzzleCells, difficulty) ===
+          0;
+        const canBeSolvedByPreviousDifficulty =
+          this.runPuzzleAttempt(
+            solutionGrid.grid,
+            puzzleCells,
+            previousDifficulty,
+          ) === 0;
+        if (canBeSolvedByPreviousDifficulty) {
+          range(5).forEach(() => {
+            puzzleCells.shift();
+          });
+        }
+
+        if (canBeSolvedByTargetDifficulty && !canBeSolvedByPreviousDifficulty) {
+          exitCondition = true;
+        }
+      }
+    } while (!exitCondition);
+    this.applyPuzzleData(solutionGrid.grid, puzzleCells);
+  };
+
   // Solves Easy but not Medium
   executeAlphaSolution = () => {
     let exitCondition = false;
@@ -512,6 +645,7 @@ export class SudokuData {
     this.useMatchedSetStrategy = false;
   };
 
+  // Solves Evil ???
   executeOmegaSolution = () => {
     throw new Error('Not Implemented');
     // Can employ the Hidden Set strategy and the X-Wing strategy
@@ -519,6 +653,6 @@ export class SudokuData {
   };
 
   solve = () => {
-    this.generateRandomGridFromSeed('test');
+    this.executeGammaSolution();
   };
 }
