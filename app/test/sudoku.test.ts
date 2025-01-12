@@ -345,6 +345,47 @@ describe('When SudokuData.populateCellsWithSinglePossibility is called', () => {
   });
 });
 
+describe('When SudokuData.getEmptyCells is called', () => {
+  it('should return all cells in the grid that do not have a number assigned.', () => {
+    const data = new SudokuData();
+    expect(data.getEmptyCells().length).toBe(81);
+    data.grid[0].number = 1;
+    data.grid[12].number = 2;
+    data.grid[24].number = 3;
+    expect(data.getEmptyCells().length).toBe(78);
+    data.grid[44].number = 5;
+    data.grid[56].number = 6;
+    data.grid[61].number = 7;
+    data.grid[73].number = 8;
+    expect(data.getEmptyCells().length).toBe(74);
+    data.grid[8].number = 9;
+    data.grid[26].number = 4;
+    data.grid[11].number = 6;
+    data.grid[18].number = 7;
+    data.grid[59].number = 8;
+    expect(data.getEmptyCells().length).toBe(69);
+    data.grid[20].number = 9;
+    data.grid[38].number = 1;
+    data.grid[47].number = 2;
+    data.grid[51].number = 4;
+    data.grid[65].number = 5;
+    data.grid[74].number = 8;
+    expect(data.getEmptyCells().length).toBe(63);
+
+    data
+      .getEmptyCells()
+      .map((c) => c.id)
+      .forEach((cellId) =>
+        expect(
+          [
+            0, 12, 24, 44, 56, 61, 73, 8, 26, 11, 18, 59, 20, 38, 47, 51, 65,
+            74,
+          ].includes(cellId),
+        ).toBe(false),
+      );
+  });
+});
+
 describe('When SudokuData.getEmptyCellCount is called', () => {
   it('should return the number of cells in the grid that do not have a number assigned.', () => {
     const data = new SudokuData();
@@ -483,6 +524,24 @@ describe('When SudokuData.eliminateSkeweredPossibilities is called', () => {
       .getRowListByRowId(2)
       .filter((cell) => cell.possibilities.includes(7));
     expect(cellsInTargetRowWithTargetPossibility.length).toBe(3);
+  });
+});
+
+describe('When SudokuData.findNakedSet is called', () => {
+  it('should ...', () => {
+    const data = new SudokuData();
+    data.grid[19].possibilities = [5, 7, 8, 9];
+    data.grid[10].possibilities = [5, 7];
+    data.grid[11].possibilities = [3, 6, 9];
+    data.grid[12].possibilities = [5, 7];
+    data.grid[13].possibilities = [3, 5, 6, 9];
+    data.grid[14].possibilities = [1, 5, 9];
+    data.grid[15].possibilities = [6, 7, 9];
+    data.grid[16].possibilities = [1, 2, 3];
+    data.grid[17].possibilities = [5, 6, 9];
+    const targetRow = data.getRowListByRowId(1);
+    console.log(targetRow);
+    expect(true).toBe(false);
   });
 });
 

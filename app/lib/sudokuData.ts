@@ -63,14 +63,14 @@ export class SudokuData {
   grid: Cell[];
   activeCell: Cell | null;
   useSkewerStrategy: boolean;
-  useMatchedSetStrategy: boolean;
+  useNakedSetStrategy: boolean;
 
   constructor(data: SudokuData | null = null) {
     if (data) {
       this.grid = data.grid;
       this.activeCell = data.activeCell;
       this.useSkewerStrategy = data.useSkewerStrategy;
-      this.useMatchedSetStrategy = data.useMatchedSetStrategy;
+      this.useNakedSetStrategy = data.useNakedSetStrategy;
     } else {
       this.grid = flatten(
         range(9).reduce(
@@ -122,7 +122,7 @@ export class SudokuData {
       });
       this.activeCell = null;
       this.useSkewerStrategy = false;
-      this.useMatchedSetStrategy = false;
+      this.useNakedSetStrategy = false;
     }
   }
 
@@ -219,15 +219,15 @@ export class SudokuData {
         );
       }
     });
-    let exitCondition = false;
-    if (this.useSkewerStrategy || this.useMatchedSetStrategy) {
+    if (this.useSkewerStrategy || this.useNakedSetStrategy) {
+      let exitCondition = false;
       do {
         const preliminaryPossibilitiesCount = this.getTotalPossibilitiesCount();
         if (this.useSkewerStrategy) {
           this.eliminateSkeweredPossibilities();
         }
-        if (this.useMatchedSetStrategy) {
-          this.eliminateMatchedSetAssociationPossibilities();
+        if (this.useNakedSetStrategy) {
+          this.eliminateNakedSetAssociationPossibilities();
         }
         const PossibilitiesCount = this.getTotalPossibilitiesCount();
         if (
@@ -248,7 +248,9 @@ export class SudokuData {
     });
   };
 
-  getEmptyCellCount = () => this.grid.filter((c) => !c.number).length;
+  getEmptyCells = () => this.grid.filter((cell) => !cell.number);
+
+  getEmptyCellCount = () => this.getEmptyCells().length;
 
   getRowListByRowId = (rowId: number) =>
     range(rowId * 9, rowId * 9 + 9).map((cellId) => this.grid[cellId]);
@@ -330,7 +332,7 @@ export class SudokuData {
   };
 
   // Untested
-  findMatchedSet = (cells: Cell[], count: number) =>
+  findNakedSet = (cells: Cell[], count: number) =>
     values(
       cells
         .filter((cell) => cell.possibilities.length === count)
@@ -344,42 +346,39 @@ export class SudokuData {
     ).find((candidate) => candidate.length === count) || null;
 
   // Untested
-  processMatchedSetAssociations = (matchedSet: Cell[], associations: Cell[]) =>
+  processNakedSetAssociations = (nakedSet: Cell[], associations: Cell[]) =>
     associations.forEach((cell) => {
-      if (!matchedSet.includes(cell)) {
+      if (!nakedSet.includes(cell)) {
         cell.possibilities = cell.possibilities.filter(
-          (possibility) => !matchedSet[0].possibilities.includes(possibility),
+          (possibility) => !nakedSet[0].possibilities.includes(possibility),
         );
       }
     });
 
   // Untested
-  eliminateMatchedSetAssociationPossibilities = () =>
+  eliminateNakedSetAssociationPossibilities = () =>
     range(9).forEach((entityId) => {
       const rowCells = this.getRowListByRowId(entityId);
-      const rowMatchedSet =
-        this.findMatchedSet(rowCells, 2) || this.findMatchedSet(rowCells, 3);
-      if (rowMatchedSet) {
-        this.processMatchedSetAssociations(rowMatchedSet, rowCells);
+      const rowNakedSet =
+        this.findNakedSet(rowCells, 2) || this.findNakedSet(rowCells, 3);
+      if (rowNakedSet) {
+        this.processNakedSetAssociations(rowNakedSet, rowCells);
       }
 
       const colCells = this.getColListByColId(entityId);
-      const colMatchedSet =
-        this.findMatchedSet(colCells, 2) || this.findMatchedSet(colCells, 3);
-      if (colMatchedSet) {
-        this.processMatchedSetAssociations(colMatchedSet, colCells);
+      const colNakedSet =
+        this.findNakedSet(colCells, 2) || this.findNakedSet(colCells, 3);
+      if (colNakedSet) {
+        this.processNakedSetAssociations(colNakedSet, colCells);
       }
 
       const gridCells = this.getGridListByGridId(entityId);
-      const gridMatchedSet =
-        this.findMatchedSet(gridCells, 2) || this.findMatchedSet(gridCells, 3);
-      if (gridMatchedSet) {
-        this.processMatchedSetAssociations(gridMatchedSet, gridCells);
+      const gridNakedSet =
+        this.findNakedSet(gridCells, 2) || this.findNakedSet(gridCells, 3);
+      if (gridNakedSet) {
+        this.processNakedSetAssociations(gridNakedSet, gridCells);
       }
     });
-
-  // Untested
-  getEmptyCells = () => this.grid.filter((cell) => !cell.number);
 
   // Untested
   getEmptyCellsWithPossibilities = () =>
@@ -625,7 +624,7 @@ export class SudokuData {
   // Solves Extreme but not Evil
   executeGammaSolution = () => {
     this.useSkewerStrategy = true;
-    this.useMatchedSetStrategy = true;
+    this.useNakedSetStrategy = true;
     let exitCondition = false;
     do {
       let preliminaryEmptyCount = this.getEmptyCellCount();
@@ -642,7 +641,7 @@ export class SudokuData {
       }
     } while (!exitCondition);
     this.useSkewerStrategy = false;
-    this.useMatchedSetStrategy = false;
+    this.useNakedSetStrategy = false;
   };
 
   // Solves Evil ???
